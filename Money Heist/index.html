@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Money Heist Live Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Bebas Neue', sans-serif;
+      color: #fff;
+      background: url('bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    /* Dark overlay to prevent blending issues */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.9); /* Made darker */
+  z-index: -1;
+}
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+
+    .header img {
+      height: 80px;
+      width: auto;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      color: #e50914;
+      text-shadow: 2px 2px #000;
+      flex-grow: 1;
+      text-align: center;
+      margin-right: 80px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+
+ th, td {
+  padding: 12px;
+  border: 1px solid #444;
+  text-align: center;
+  background-color: #000; /* Solid black background */
+  color: #fff; /* Make sure text is white for contrast */
+}
+
+    th {
+      background-color: #e50914;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+tr:hover td {
+  background-color: #222; /* Slightly lighter on hover */
+}
+
+    tr:hover td {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2rem;
+        margin-right: 0;
+      }
+
+      .header img {
+        height: 50px;
+      }
+
+      th, td {
+        font-size: 0.85rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <!-- Replace with your logo filename -->
+      <img src="FYI_Banner_Cropped.jpg" alt="Money Heist Logo" />
+      <h1>💰 MONEY HEIST LIVE DASHBOARD 💰</h1>
+    </div>
+
+    <table id="data-table">
+      <thead>
+        <tr>
+          <th>Team ID</th>
+          <th>Team Name</th>
+          <th>Members</th>
+          <th>Role</th>
+          <th>Approach</th>
+          <th>Money</th>
+          <th>Gamble</th>
+          <th>Betrayal</th>
+          <th>Escaped?</th>
+          <th>Penalty</th>
+          <th>Final Score</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnhgv2gfV7ho1k70q37hGbLrmgGII4c1k",
+      authDomain: "money-heist-d5791.firebaseapp.com",
+      projectId: "money-heist-d5791",
+      storageBucket: "money-heist-d5791.firebasestorage.app",
+      messagingSenderId: "313005834357",
+      appId: "1:313005834357:web:c85191a3d1533cebb9b83c",
+      measurementId: "G-YB17DE3MBV"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const tableBody = document.getElementById('table-body');
+
+    db.ref('teams').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (!data) {
+        tableBody.innerHTML = '<tr><td colspan="11">No teams found</td></tr>';
+        return;
+      }
+
+      const sortedTeams = Object.values(data).sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
+      tableBody.innerHTML = '';
+
+      sortedTeams.forEach(team => {
+        const row = `
+          <tr>
+            <td>${team.teamID || '-'}</td>
+            <td>${team.teamName || '-'}</td>
+            <td>${team.members || '-'}</td>
+            <td>${team.roles || '-'}</td>
+            <td>${team.approach || '-'}</td>
+            <td>₹${team.money || 0}</td>
+            <td>${team.gambleResult || '-'}</td>
+            <td>${team.betrayal || '-'}</td>
+            <td>${team.escaped ? 'Yes' : 'No'}</td>
+            <td>₹${team.penalty || 0}</td>
+            <td><strong>₹${team.finalScore || 0}</strong></td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+    });
+  </script>
+</body>
+</html>
